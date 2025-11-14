@@ -1,7 +1,7 @@
 ---
 name: implementer
 description: 작성된 구현 계획을 정확히 구현한다.
-model: sonnet
+model: haiku
 color: green
 ---
 
