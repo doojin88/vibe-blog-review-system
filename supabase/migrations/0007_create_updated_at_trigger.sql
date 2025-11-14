@@ -2,37 +2,66 @@
 -- This migration creates a trigger function to automatically update the updated_at column
 -- and applies it to all tables
 
--- Create trigger function
-CREATE OR REPLACE FUNCTION public.update_updated_at_column()
-RETURNS TRIGGER AS $$
+-- Create trigger function if it doesn't exist
+DO $$
 BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc
+    WHERE proname = 'update_updated_at_column'
+    AND pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')
+  ) THEN
+    CREATE FUNCTION public.update_updated_at_column()
+    RETURNS TRIGGER AS $FUNCTION$
+    BEGIN
+      NEW.updated_at = now();
+      RETURN NEW;
+    END;
+    $FUNCTION$ LANGUAGE plpgsql;
+  END IF;
+END
+$$;
 
-COMMENT ON FUNCTION public.update_updated_at_column() IS '테이블의 updated_at 컬럼을 현재 시각으로 자동 업데이트하는 트리거 함수';
+-- Create triggers for each table if they don't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'set_updated_at'
+    AND tgrelid = 'public.advertisers'::regclass
+  ) THEN
+    CREATE TRIGGER set_updated_at
+    BEFORE UPDATE ON public.advertisers
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+  END IF;
 
--- Apply trigger to advertisers table
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON public.advertisers
-FOR EACH ROW
-EXECUTE FUNCTION public.update_updated_at_column();
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'set_updated_at'
+    AND tgrelid = 'public.influencers'::regclass
+  ) THEN
+    CREATE TRIGGER set_updated_at
+    BEFORE UPDATE ON public.influencers
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+  END IF;
 
--- Apply trigger to influencers table
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON public.influencers
-FOR EACH ROW
-EXECUTE FUNCTION public.update_updated_at_column();
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'set_updated_at'
+    AND tgrelid = 'public.campaigns'::regclass
+  ) THEN
+    CREATE TRIGGER set_updated_at
+    BEFORE UPDATE ON public.campaigns
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+  END IF;
 
--- Apply trigger to campaigns table
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON public.campaigns
-FOR EACH ROW
-EXECUTE FUNCTION public.update_updated_at_column();
-
--- Apply trigger to applications table
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON public.applications
-FOR EACH ROW
-EXECUTE FUNCTION public.update_updated_at_column();
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'set_updated_at'
+    AND tgrelid = 'public.applications'::regclass
+  ) THEN
+    CREATE TRIGGER set_updated_at
+    BEFORE UPDATE ON public.applications
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+  END IF;
+END
+$$;

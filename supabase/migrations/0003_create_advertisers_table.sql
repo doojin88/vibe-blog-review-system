@@ -2,7 +2,7 @@
 -- This table stores advertiser profile information
 -- Has a 1:1 relationship with auth.users
 
-CREATE TABLE IF NOT EXISTS public.advertisers (
+CREATE TABLE public.advertisers (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   user_id uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   name text NOT NULL,

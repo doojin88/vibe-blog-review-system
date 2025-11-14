@@ -1,0 +1,13 @@
+export const ApplicationErrorCodes = {
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  INVALID_REQUEST: 'INVALID_REQUEST',
+  PROFILE_NOT_FOUND: 'PROFILE_NOT_FOUND',
+  CAMPAIGN_NOT_FOUND: 'CAMPAIGN_NOT_FOUND',
+  CAMPAIGN_CLOSED: 'CAMPAIGN_CLOSED',
+  ALREADY_APPLIED: 'ALREADY_APPLIED',
+  DATABASE_ERROR: 'DATABASE_ERROR',
+  CREATE_FAILED: 'CREATE_FAILED',
+} as const;
+
+export type ApplicationServiceError =
+  (typeof ApplicationErrorCodes)[keyof typeof ApplicationErrorCodes];

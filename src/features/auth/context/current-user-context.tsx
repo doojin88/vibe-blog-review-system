@@ -11,10 +11,12 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { match, P } from "ts-pattern";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { apiClient } from "@/lib/remote/api-client";
 import type {
   CurrentUserContextValue,
   CurrentUserSnapshot,
 } from "../types";
+import type { ProfileResponse } from "@/features/profile/lib/dto";
 
 const CurrentUserContext = createContext<CurrentUserContextValue | null>(null);
 
@@ -37,20 +39,56 @@ export const CurrentUserProvider = ({
     try {
       const result = await supabase.auth.getUser();
 
-      const nextSnapshot = match(result)
-        .with({ data: { user: P.nonNullable } }, ({ data }) => ({
-          status: "authenticated" as const,
-          user: {
-            id: data.user.id,
-            email: data.user.email,
-            appMetadata: data.user.app_metadata ?? {},
-            userMetadata: data.user.user_metadata ?? {},
-          },
-        }))
-        .otherwise(() => ({ status: "unauthenticated" as const, user: null }));
+      if (result.error || !result.data.user) {
+        const fallbackSnapshot: CurrentUserSnapshot = {
+          status: "unauthenticated",
+          user: null,
+        };
+        setSnapshot(fallbackSnapshot);
+        queryClient.setQueryData(["currentUser"], fallbackSnapshot);
+        return;
+      }
 
-      setSnapshot(nextSnapshot);
-      queryClient.setQueryData(["currentUser"], nextSnapshot);
+      const user = result.data.user;
+
+      // Fetch profile data from /api/profile
+      try {
+        const profileResponse = await apiClient.get<ProfileResponse>("/api/profile");
+        const profileData = profileResponse.data;
+
+        const nextSnapshot: CurrentUserSnapshot = {
+          status: "authenticated",
+          user: {
+            id: user.id,
+            email: user.email,
+            appMetadata: user.app_metadata ?? {},
+            userMetadata: user.user_metadata ?? {},
+            role: profileData.role,
+            hasProfile: profileData.hasProfile,
+            profile: profileData.profile,
+          },
+        };
+
+        setSnapshot(nextSnapshot);
+        queryClient.setQueryData(["currentUser"], nextSnapshot);
+      } catch (profileError) {
+        // If profile API fails, fallback to basic user data without profile
+        const nextSnapshot: CurrentUserSnapshot = {
+          status: "authenticated",
+          user: {
+            id: user.id,
+            email: user.email,
+            appMetadata: user.app_metadata ?? {},
+            userMetadata: user.user_metadata ?? {},
+            role: null,
+            hasProfile: false,
+            profile: undefined,
+          },
+        };
+
+        setSnapshot(nextSnapshot);
+        queryClient.setQueryData(["currentUser"], nextSnapshot);
+      }
     } catch (error) {
       const fallbackSnapshot: CurrentUserSnapshot = {
         status: "unauthenticated",
