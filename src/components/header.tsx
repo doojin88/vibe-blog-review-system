@@ -97,7 +97,8 @@ export const Header = () => {
             >
               홈
             </Link>
-            {isAuthenticated && user?.role === 'advertiser' && (
+            {/* 광고주 전용 메뉴 */}
+            {isAuthenticated && user?.role === 'advertiser' && user?.hasProfile && (
               <Link
                 href="/dashboard"
                 className="text-sm font-medium transition-colors hover:text-primary"
@@ -105,12 +106,22 @@ export const Header = () => {
                 대시보드
               </Link>
             )}
-            {isAuthenticated && user?.role === 'influencer' && (
+            {/* 인플루언서 전용 메뉴 */}
+            {isAuthenticated && user?.role === 'influencer' && user?.hasProfile && (
               <Link
                 href="/my/applications"
                 className="text-sm font-medium transition-colors hover:text-primary"
               >
                 내 지원 목록
+              </Link>
+            )}
+            {/* 프로필 미등록 사용자 - 온보딩 안내 */}
+            {isAuthenticated && user && !user.hasProfile && (
+              <Link
+                href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                프로필 등록
               </Link>
             )}
           </nav>
@@ -152,7 +163,8 @@ export const Header = () => {
                 >
                   홈
                 </Link>
-                {isAuthenticated && user?.role === 'advertiser' && (
+                {/* 광고주 전용 메뉴 */}
+                {isAuthenticated && user?.role === 'advertiser' && user?.hasProfile && (
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
@@ -161,13 +173,24 @@ export const Header = () => {
                     대시보드
                   </Link>
                 )}
-                {isAuthenticated && user?.role === 'influencer' && (
+                {/* 인플루언서 전용 메뉴 */}
+                {isAuthenticated && user?.role === 'influencer' && user?.hasProfile && (
                   <Link
                     href="/my/applications"
                     onClick={() => setMobileMenuOpen(false)}
                     className="text-sm font-medium transition-colors hover:text-primary"
                   >
                     내 지원 목록
+                  </Link>
+                )}
+                {/* 프로필 미등록 사용자 - 온보딩 안내 */}
+                {isAuthenticated && user && !user.hasProfile && (
+                  <Link
+                    href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium transition-colors hover:text-primary"
+                  >
+                    프로필 등록
                   </Link>
                 )}
                 {!isAuthenticated && (
@@ -240,7 +263,8 @@ export const Header = () => {
                       홈으로
                     </Link>
                   </DropdownMenuItem>
-                  {user.role === 'advertiser' && (
+                  {/* 광고주 전용 메뉴 */}
+                  {user.role === 'advertiser' && user.hasProfile && (
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard" className="flex items-center">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -248,11 +272,24 @@ export const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {user.role === 'influencer' && (
+                  {/* 인플루언서 전용 메뉴 */}
+                  {user.role === 'influencer' && user.hasProfile && (
                     <DropdownMenuItem asChild>
                       <Link href="/my/applications" className="flex items-center">
                         <Briefcase className="mr-2 h-4 w-4" />
                         내 지원 목록
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {/* 프로필 미등록 사용자 - 온보딩 안내 */}
+                  {!user.hasProfile && user.role && (
+                    <DropdownMenuItem asChild>
+                      <Link 
+                        href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
+                        className="flex items-center"
+                      >
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        프로필 등록
                       </Link>
                     </DropdownMenuItem>
                   )}
