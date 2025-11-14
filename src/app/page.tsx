@@ -1,9 +1,5 @@
-import { CampaignList } from '@/features/campaign/components/campaign-list';
+import { LandingPage } from '@/components/landing-page';
 
 export default function HomePage() {
-  return (
-    <main>
-      <CampaignList />
-    </main>
-  );
+  return <LandingPage />;
 }
