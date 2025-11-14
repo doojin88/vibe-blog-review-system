@@ -14,7 +14,6 @@ import {
   ArrowRight,
   CheckCircle2
 } from 'lucide-react';
-import { CampaignList } from '@/features/campaign/components/campaign-list';
 
 const FEATURES = [
   {
@@ -241,21 +240,6 @@ export const LandingPage = () => {
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Campaign Preview Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              지금 모집 중인 체험단
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              다양한 체험 기회를 확인해보세요
-            </p>
-          </div>
-          <CampaignList />
         </div>
       </section>
 
