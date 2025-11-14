@@ -2,6 +2,7 @@
 
 ## Must
 
+- '@/prompts/' 는 직접 지정하지 않으면 참고하지 않는다.
 - always use client component for all components. (use `use client` directive)
 - always use promise for page.tsx params props.
 - use valid picsum.photos stock image for placeholder image
