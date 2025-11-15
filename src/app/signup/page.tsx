@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -56,10 +56,15 @@ export default function SignupPage({ params }: SignupPageProps) {
   void params;
 
   const router = useRouter();
-  const { isAuthenticated, refresh } = useCurrentUser();
+  const searchParams = useSearchParams();
+  const { isAuthenticated, user, refresh } = useCurrentUser();
   const supabase = getSupabaseBrowserClient();
 
-  const [currentStep, setCurrentStep] = useState<SignupStep>("credentials");
+  // URL 쿼리 파라미터에서 step 확인
+  const stepParam = searchParams.get("step");
+  const initialStep: SignupStep = stepParam === "role-select" ? "role" : "credentials";
+  
+  const [currentStep, setCurrentStep] = useState<SignupStep>(initialStep);
   const [credentials, setCredentials] = useState<SignupStep1Data | null>(null);
   const [selectedRole, setSelectedRole] = useState<
     "advertiser" | "influencer" | null
@@ -77,10 +82,12 @@ export default function SignupPage({ params }: SignupPageProps) {
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // 인증된 사용자이고 역할이 선택된 경우에만 홈으로 리다이렉트
+    // 역할이 없으면 역할 선택 단계를 보여줘야 하므로 리다이렉트하지 않음
+    if (isAuthenticated && user && user.role !== null && user.hasProfile) {
       router.replace("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   const handleCredentialsSubmit = async (data: SignupStep1Data) => {
     setIsSubmitting(true);
@@ -103,11 +110,39 @@ export default function SignupPage({ params }: SignupPageProps) {
     setIsSubmitting(false);
   };
 
-  const handleRoleSubmit = () => {
-    if (selectedRole === "advertiser") {
-      router.push("/onboarding/advertiser");
-    } else if (selectedRole === "influencer") {
-      router.push("/onboarding/influencer");
+  const handleRoleSubmit = async () => {
+    if (!selectedRole) return;
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      // 역할을 user_metadata에 저장
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          role: selectedRole,
+        },
+      });
+
+      if (updateError) {
+        setErrorMessage("역할 저장에 실패했습니다.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 사용자 정보 갱신
+      await refresh();
+
+      // 역할에 따라 온보딩 페이지로 이동
+      if (selectedRole === "advertiser") {
+        router.push("/onboarding/advertiser");
+      } else if (selectedRole === "influencer") {
+        router.push("/onboarding/influencer");
+      }
+    } catch (error) {
+      setErrorMessage("역할 저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,7 +152,9 @@ export default function SignupPage({ params }: SignupPageProps) {
     setErrorMessage(null);
   };
 
-  if (isAuthenticated) {
+  // 인증된 사용자이고 역할이 선택되고 프로필이 있는 경우에만 리다이렉트
+  // 역할이 없거나 프로필이 없으면 회원가입 페이지를 계속 보여줌
+  if (isAuthenticated && user && user.role !== null && user.hasProfile) {
     return null;
   }
 

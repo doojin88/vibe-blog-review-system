@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,12 +16,14 @@ import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { useToast } from '@/hooks/use-toast';
 import { extractApiErrorMessage } from '@/lib/remote/api-client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 
 export default function InfluencerOnboardingPage() {
   const router = useRouter();
-  const { user, isLoading: isUserLoading } = useCurrentUser();
+  const { user, isLoading: isUserLoading, refresh } = useCurrentUser();
   const { toast } = useToast();
   const createInfluencer = useCreateInfluencer();
+  const supabase = getSupabaseBrowserClient();
 
   const form = useForm<CreateInfluencerInput>({
     resolver: zodResolver(createInfluencerSchema),
@@ -41,6 +43,39 @@ export default function InfluencerOnboardingPage() {
       router.push('/login?redirect=/onboarding/influencer');
     }
   }, [user, isUserLoading, router]);
+
+  // 역할이 user_metadata에 없으면 저장 (한 번만 실행)
+  const roleSavedRef = useRef(false);
+  useEffect(() => {
+    if (!isUserLoading && user && !user.role && !roleSavedRef.current) {
+      roleSavedRef.current = true;
+      const saveRole = async () => {
+        try {
+          const { error } = await supabase.auth.updateUser({
+            data: {
+              role: 'influencer',
+            },
+          });
+          if (!error) {
+            await refresh();
+          } else {
+            // 역할 저장 실패 시 플래그 리셋하여 재시도 가능하게 함
+            roleSavedRef.current = false;
+          }
+        } catch (error) {
+          // 역할 저장 실패 시 플래그 리셋하여 재시도 가능하게 함
+          roleSavedRef.current = false;
+          console.error('Failed to save role:', error);
+        }
+      };
+      void saveRole();
+    }
+    
+    // 사용자 역할이 설정되면 플래그 리셋
+    if (user?.role) {
+      roleSavedRef.current = false;
+    }
+  }, [user, isUserLoading, supabase, refresh]);
 
   // 이미 등록된 사용자 리다이렉트
   useEffect(() => {

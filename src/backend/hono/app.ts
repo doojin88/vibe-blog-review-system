@@ -29,7 +29,7 @@ export const createHonoApp = () => {
   registerExampleRoutes(app);
   app.route('/profile', profileRoute as any);
   app.route('/advertisers', advertiserRoute as any);
-  app.route('/api/campaigns', campaignsRoute as any);
+  app.route('/campaigns', campaignsRoute as any);
   registerCampaignRoutes(app);
   registerInfluencerRoutes(app);
   app.route('/applications', applicationsRoute as any);

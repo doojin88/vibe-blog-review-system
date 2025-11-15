@@ -100,7 +100,10 @@ export function useLogin(): UseLoginReturn {
         // 2. 사용자 정보 갱신 (CurrentUserContext)
         await refresh();
 
-        // 3. 갱신된 사용자 정보 가져오기
+        // 3. 잠시 대기하여 상태 업데이트 완료 보장
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // 4. 갱신된 사용자 정보 가져오기
         const { data: { user: authUser } } = await supabase.auth.getUser();
         
         if (!authUser) {
@@ -108,7 +111,7 @@ export function useLogin(): UseLoginReturn {
           return;
         }
 
-        // 4. 프로필 정보 조회
+        // 5. 프로필 정보 조회
         let profileData: ProfileResponse | null = null;
         try {
           const profileResponse = await apiClient.get<ProfileResponse>('/api/profile');
@@ -121,7 +124,7 @@ export function useLogin(): UseLoginReturn {
           };
         }
 
-        // 5. 리다이렉트 경로 결정을 위한 사용자 객체 생성
+        // 6. 리다이렉트 경로 결정을 위한 사용자 객체 생성
         const currentUser: CurrentUser = {
           id: authUser.id,
           email: authUser.email,
@@ -134,7 +137,7 @@ export function useLogin(): UseLoginReturn {
 
         const redirectPath = determineRedirectPath(currentUser, searchParams);
 
-        // 6. 리다이렉트
+        // 7. 리다이렉트
         router.push(redirectPath);
       } catch (error) {
         setErrorMessage("로그인 처리 중 오류가 발생했습니다.");

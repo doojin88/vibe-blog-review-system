@@ -71,8 +71,10 @@ export const CurrentUserProvider = ({
 
         setSnapshot(nextSnapshot);
         queryClient.setQueryData(["currentUser"], nextSnapshot);
-      } catch (profileError) {
-        // If profile API fails, fallback to basic user data without profile
+      } catch (profileError: unknown) {
+        // If profile API fails, use user_metadata to determine role
+        const userRole = user.user_metadata?.role as "advertiser" | "influencer" | undefined;
+        
         const nextSnapshot: CurrentUserSnapshot = {
           status: "authenticated",
           user: {
@@ -80,7 +82,7 @@ export const CurrentUserProvider = ({
             email: user.email,
             appMetadata: user.app_metadata ?? {},
             userMetadata: user.user_metadata ?? {},
-            role: null,
+            role: userRole || null,
             hasProfile: false,
             profile: undefined,
           },

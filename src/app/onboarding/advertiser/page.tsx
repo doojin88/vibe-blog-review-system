@@ -5,16 +5,35 @@ import { useRouter } from 'next/navigation';
 import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { AdvertiserOnboardingForm } from '@/features/advertiser/components/advertiser-onboarding-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 
 export default function AdvertiserOnboardingPage() {
   const router = useRouter();
-  const { user, status, isAuthenticated } = useCurrentUser();
+  const { user, status, isAuthenticated, refresh } = useCurrentUser();
+  const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace('/login?redirect=/onboarding/advertiser');
     }
   }, [status, router]);
+
+  // 역할이 user_metadata에 없으면 저장
+  useEffect(() => {
+    if (status === 'authenticated' && user && !user.role) {
+      const saveRole = async () => {
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            role: 'advertiser',
+          },
+        });
+        if (!error) {
+          await refresh();
+        }
+      };
+      void saveRole();
+    }
+  }, [user, status, supabase, refresh]);
 
   useEffect(() => {
     if (user?.role === 'advertiser' && user?.hasProfile) {

@@ -27,8 +27,8 @@ app.get("/", async (c) => {
       );
     }
 
-    // Get user profile
-    const profileData = await getUserProfile(supabase, user.id);
+    // Get user profile (pass user_metadata to check for selected role)
+    const profileData = await getUserProfile(supabase, user.id, user.user_metadata);
 
     return respond(
       c,

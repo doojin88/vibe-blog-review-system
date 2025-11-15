@@ -14,7 +14,7 @@ export const loadCurrentUser = async (): Promise<CurrentUserSnapshot> => {
     return { status: "unauthenticated", user: null };
   }
 
-  const profileData = await getUserProfile(supabase, user.id);
+  const profileData = await getUserProfile(supabase, user.id, user.user_metadata);
 
   return {
     status: "authenticated",
