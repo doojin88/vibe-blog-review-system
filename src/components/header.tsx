@@ -25,7 +25,7 @@ import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 import { Loader2, LogOut, LayoutDashboard, Home, Briefcase, Menu } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const Header = () => {
   const router = useRouter();
@@ -33,6 +33,11 @@ export const Header = () => {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading, refresh } = useCurrentUser();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -97,32 +102,36 @@ export const Header = () => {
             >
               홈
             </Link>
-            {/* 광고주 전용 메뉴 */}
-            {isAuthenticated && user?.role === 'advertiser' && user?.hasProfile && (
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                대시보드
-              </Link>
-            )}
-            {/* 인플루언서 전용 메뉴 */}
-            {isAuthenticated && user?.role === 'influencer' && user?.hasProfile && (
-              <Link
-                href="/my/applications"
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                내 지원 목록
-              </Link>
-            )}
-            {/* 프로필 미등록 사용자 - 온보딩 안내 */}
-            {isAuthenticated && user && !user.hasProfile && (
-              <Link
-                href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                프로필 등록
-              </Link>
+            {mounted && (
+              <>
+                {/* 광고주 전용 메뉴 */}
+                {isAuthenticated && user?.role === 'advertiser' && user?.hasProfile && (
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium transition-colors hover:text-primary"
+                  >
+                    대시보드
+                  </Link>
+                )}
+                {/* 인플루언서 전용 메뉴 */}
+                {isAuthenticated && user?.role === 'influencer' && user?.hasProfile && (
+                  <Link
+                    href="/my/applications"
+                    className="text-sm font-medium transition-colors hover:text-primary"
+                  >
+                    내 지원 목록
+                  </Link>
+                )}
+                {/* 프로필 미등록 사용자 - 온보딩 안내 */}
+                {isAuthenticated && user && !user.hasProfile && (
+                  <Link
+                    href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
+                    className="text-sm font-medium transition-colors hover:text-primary"
+                  >
+                    프로필 등록
+                  </Link>
+                )}
+              </>
             )}
           </nav>
 
@@ -138,7 +147,7 @@ export const Header = () => {
               <SheetHeader>
                 <SheetTitle>메뉴</SheetTitle>
               </SheetHeader>
-              {isAuthenticated && user && (
+              {mounted && isAuthenticated && user && (
                 <div className="flex items-center gap-3 mt-6 pb-4 border-b">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src="" alt={getUserDisplayName()} />
@@ -163,64 +172,68 @@ export const Header = () => {
                 >
                   홈
                 </Link>
-                {/* 광고주 전용 메뉴 */}
-                {isAuthenticated && user?.role === 'advertiser' && user?.hasProfile && (
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    대시보드
-                  </Link>
-                )}
-                {/* 인플루언서 전용 메뉴 */}
-                {isAuthenticated && user?.role === 'influencer' && user?.hasProfile && (
-                  <Link
-                    href="/my/applications"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    내 지원 목록
-                  </Link>
-                )}
-                {/* 프로필 미등록 사용자 - 온보딩 안내 */}
-                {isAuthenticated && user && !user.hasProfile && (
-                  <Link
-                    href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    프로필 등록
-                  </Link>
-                )}
-                {!isAuthenticated && (
+                {mounted && (
                   <>
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-sm font-medium transition-colors hover:text-primary"
-                    >
-                      로그인
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-sm font-medium transition-colors hover:text-primary"
-                    >
-                      회원가입
-                    </Link>
+                    {/* 광고주 전용 메뉴 */}
+                    {isAuthenticated && user?.role === 'advertiser' && user?.hasProfile && (
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-sm font-medium transition-colors hover:text-primary"
+                      >
+                        대시보드
+                      </Link>
+                    )}
+                    {/* 인플루언서 전용 메뉴 */}
+                    {isAuthenticated && user?.role === 'influencer' && user?.hasProfile && (
+                      <Link
+                        href="/my/applications"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-sm font-medium transition-colors hover:text-primary"
+                      >
+                        내 지원 목록
+                      </Link>
+                    )}
+                    {/* 프로필 미등록 사용자 - 온보딩 안내 */}
+                    {isAuthenticated && user && !user.hasProfile && (
+                      <Link
+                        href={user.role === 'advertiser' ? '/onboarding/advertiser' : '/onboarding/influencer'}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-sm font-medium transition-colors hover:text-primary"
+                      >
+                        프로필 등록
+                      </Link>
+                    )}
+                    {!isAuthenticated && (
+                      <>
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-sm font-medium transition-colors hover:text-primary"
+                        >
+                          로그인
+                        </Link>
+                        <Link
+                          href="/signup"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="text-sm font-medium transition-colors hover:text-primary"
+                        >
+                          회원가입
+                        </Link>
+                      </>
+                    )}
+                    {isAuthenticated && (
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="text-sm font-medium text-destructive text-left transition-colors hover:text-destructive/80"
+                      >
+                        로그아웃
+                      </button>
+                    )}
                   </>
-                )}
-                {isAuthenticated && (
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-sm font-medium text-destructive text-left transition-colors hover:text-destructive/80"
-                  >
-                    로그아웃
-                  </button>
                 )}
               </nav>
             </SheetContent>
@@ -228,7 +241,9 @@ export const Header = () => {
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
-            {isLoading ? (
+            {!mounted ? (
+              <div className="h-10 w-10" />
+            ) : isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             ) : isAuthenticated && user ? (
               <DropdownMenu>
