@@ -1,7 +1,7 @@
 -- Migration: Create applications table
 -- This table stores application information from influencers to campaigns
 
-CREATE TABLE public.applications (
+CREATE TABLE IF NOT EXISTS public.applications (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   campaign_id bigint NOT NULL REFERENCES public.campaigns(id) ON DELETE CASCADE,
   influencer_id bigint NOT NULL REFERENCES public.influencers(id) ON DELETE CASCADE,

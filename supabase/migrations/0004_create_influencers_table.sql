@@ -2,7 +2,7 @@
 -- This table stores influencer profile information
 -- Has a 1:1 relationship with auth.users
 
-CREATE TABLE public.influencers (
+CREATE TABLE IF NOT EXISTS public.influencers (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   user_id uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   name text NOT NULL,

@@ -1,7 +1,7 @@
 -- Migration: Create campaigns table
 -- This table stores campaign information registered by advertisers
 
-CREATE TABLE public.campaigns (
+CREATE TABLE IF NOT EXISTS public.campaigns (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   advertiser_id bigint NOT NULL REFERENCES public.advertisers(id) ON DELETE CASCADE,
   title text NOT NULL,
