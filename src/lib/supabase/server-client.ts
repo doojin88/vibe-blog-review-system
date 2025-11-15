@@ -31,11 +31,16 @@ export const createSupabaseServerClient = async (): Promise<
           return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            if (typeof cookieStore.set === "function") {
-              cookieStore.set({ name, value, ...options });
-            }
-          });
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              if (typeof cookieStore.set === "function") {
+                cookieStore.set({ name, value, ...options });
+              }
+            });
+          } catch {
+            // Server Component에서 쿠키 설정 불가능
+            // middleware에서 세션을 갱신하므로 무시 가능
+          }
         },
       },
     }
