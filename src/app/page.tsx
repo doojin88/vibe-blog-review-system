@@ -1,3 +1,5 @@
+'use client';
+
 import { LandingPage } from '@/components/landing-page';
 import { HomeRedirect } from '@/components/home-redirect';
 
