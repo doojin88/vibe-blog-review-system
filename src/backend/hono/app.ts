@@ -16,7 +16,10 @@ import type { AppEnv } from '@/backend/hono/context';
 let singletonApp: Hono<AppEnv> | null = null;
 
 export const createHonoApp = () => {
-  if (singletonApp) {
+  // 개발 모드에서는 싱글톤을 사용하지 않아 HMR이 제대로 작동하도록 함
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  if (!isDev && singletonApp) {
     return singletonApp;
   }
 
@@ -27,16 +30,22 @@ export const createHonoApp = () => {
   app.use('*', withSupabase());
 
   registerExampleRoutes(app);
+  
+  // 더 구체적인 경로를 먼저 등록
+  registerCampaignDetailRoutes(app);
+  registerCampaignRoutes(app);
+  
+  // 기본 경로 등록
   app.route('/profile', profileRoute as any);
   app.route('/advertisers', advertiserRoute as any);
   app.route('/campaigns', campaignsRoute as any);
-  registerCampaignRoutes(app);
   registerInfluencerRoutes(app);
   app.route('/applications', applicationsRoute as any);
   registerApplicationRoutes(app);
-  registerCampaignDetailRoutes(app);
 
-  singletonApp = app;
+  if (!isDev) {
+    singletonApp = app;
+  }
 
   return app;
 };

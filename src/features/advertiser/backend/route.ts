@@ -11,6 +11,7 @@ app.post('/', async (c) => {
   try {
     const supabase = c.get('supabase');
     const logger = c.get('logger');
+    logger.info('POST /advertisers 요청 수신');
 
     // 1. 인증 확인
     const { data: { user }, error: authError } = await supabase.auth.getUser();

@@ -6,7 +6,7 @@ import { getCampaignDetail, getApplicants, earlyClosure, selectInfluencers } fro
 import { CAMPAIGN_DETAIL_ERROR } from './error';
 
 export const registerCampaignDetailRoutes = (app: Hono<AppEnv>) => {
-  app.get('/api/campaigns/:id', async (c) => {
+  app.get('/campaigns/:id', async (c) => {
     const supabase = c.get('supabase');
     const logger = c.get('logger');
 
@@ -41,7 +41,7 @@ export const registerCampaignDetailRoutes = (app: Hono<AppEnv>) => {
     return respond(c, result);
   });
 
-  app.get('/api/campaigns/:id/applications', async (c) => {
+  app.get('/campaigns/:id/applications', async (c) => {
     const supabase = c.get('supabase');
     const logger = c.get('logger');
 
@@ -79,7 +79,7 @@ export const registerCampaignDetailRoutes = (app: Hono<AppEnv>) => {
     return respond(c, result);
   });
 
-  app.patch('/api/campaigns/:id/status', async (c) => {
+  app.patch('/campaigns/:id/status', async (c) => {
     const supabase = c.get('supabase');
     const logger = c.get('logger');
 
@@ -121,7 +121,7 @@ export const registerCampaignDetailRoutes = (app: Hono<AppEnv>) => {
     return respond(c, result);
   });
 
-  app.patch('/api/applications/bulk', async (c) => {
+  app.patch('/applications/bulk', async (c) => {
     const supabase = c.get('supabase');
     const logger = c.get('logger');
 
